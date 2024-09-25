@@ -10,3 +10,32 @@ knitr::opts_chunk$set(echo = T, message = F, warning = F)
 library(tidyverse)
 library(ggplot2)
 ```
+# 1. Exponential Density and Survival-related Functions
+(a) Let $\hat{\lambda}$ be the maximum likelihood estimator of the parameter $\lambda$.  
+For relapse time:  
+$\hat{\lambda}=\frac{6}{5+8+12+24+32+17+16+17+19+30}\approx0.033$  
+This indicates that the rate of relapse is about 3.33% per month.  
+For relapse time:  
+$\hat{\lambda}=\frac{3}{10+12+15+33+45+28+16+17+19+30}\approx0.013$  
+This indicates that the rate of death is about 1.33% per month. 
+
+(b)   
+i. Mean is $\int_0^\infty t\lambda e^{-\lambda t} dt=\frac{1}{\lambda}$ and I will use $\hat{\lambda}$ to derive the following values.  
+Mean time to relapse:  
+$\frac{1}{0.033}\approx30.303$ months
+Mean survival time:  
+$\frac{1}{0.013}\approx76.923$ months  
+
+ii. Median is $0.5=e^{-\lambda \tau} \Rightarrow\tau = \frac{-log(0.5)}{\lambda}$. By $\hat{\lambda}$,  
+Median time to relapse:  
+$\frac{-log(0.5)}{0.033}\approx21.004$ months
+Median survival time:  
+$\frac{-log(0.5)}{0.013}\approx53.319$ months    
+
+iii. 
+
+
+
+
+
+
