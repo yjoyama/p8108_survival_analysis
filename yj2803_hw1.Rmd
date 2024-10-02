@@ -5,7 +5,7 @@ output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = T, message = F, warning = F)
+knitr::opts_chunk$set(echo = F, message = F, warning = F)
 
 library(tidyverse)
 library(ggplot2)
@@ -31,11 +31,67 @@ Median time to relapse:
 $\frac{-log(0.5)}{0.033}\approx21.004$ months
 Median survival time:  
 $\frac{-log(0.5)}{0.013}\approx53.319$ months    
+```{r}
+# relapse survival function
+lambda_rl = 6/(5+8+12+24+32+17+16+17+19+30)
+sr12 = exp(-lambda_rl*12)
+sr24 = exp(-lambda_rl*24)
 
-iii. 
+# death survival function
+lambda_d = 3/(10+12+15+33+45+28+16+17+19+30)
+sd12 = exp(-lambda_d*12)
+sd24 = exp(-lambda_d*24)
+```
+iii. The survival function of exponential distribution is $S(t)=e^{-\lambda t}$. 
+For relapse:  
+$S_R(12)=e^{-0.033*12}=$ `r round(sr12, 3)`   
+$S_R(24)=e^{-0.033*24}=$ `r round(sr24, 3)`  
+For death:  
+$S_D(12)=e^{-0.013*12}=$ `r round(sd12, 3)`   
+$S_D(24)=e^{-0.013*24}=$ `r round(sd24, 3)`
 
+```{r}
+# relapse F(t)
+fr12 = lambda_rl * 12
+fr24 = lambda_rl * 24
 
+# death F(t)
+fd12 = lambda_d * 12
+fd24 = lambda_d * 24
+```
 
+iv. The cumulative probabilities can be calculated as: $F(t) = \int_0^t \lambda(u) du = \lambda t$  
+For relapse:  
+$F_R(12)=0.033\times12=$ `r round(fr12, 3)`   
+$F_R(24)=0.033\times24$ `r round(fr24, 3)`  
+For death:  
+$F_D(12)=0.013\times12=$ `r round(fd12, 3)`   
+$F_D(24)=0.013\times24=$ `r round(fd24, 3)`
+
+v. The conditional probability can be expressed as $P(T>24|T>12)=\frac{S_R(24)}{S_R(12)}=$ `r round(sr24/sr12, 3)`  
+It is the same as what we observed in (iii) $S_R(12)$. This means that the conditional probability of being relapse-free after 2 years given that one has remained relapse-free for at least 1 year simplifies to the survival function for the remaining time period (memoryless property of the exponential distribution).
+
+(c) We can use Kaplan-Meier estimator to estimate median time to relapse. I will calculate them using R. 
+```{r echo=T}
+library(survival)
+library(ggsurvfit)
+
+# set up data
+df1 <- data.frame(
+  relapse_time = c(5, 8, 12, 24, 32, 17, 16, 17, 19, 30),
+  relapse_censored = c(1, 1, 1, 1, 1, 1, 0, 0, 0, 0) # 1: event, 0: censored
+)
+
+# fit KM curve
+relapse_surv <- Surv(df1$relapse_time, df1$relapse_censored)
+relapse_km <- survfit(relapse_surv ~ 1)
+relapse_km |> 
+  ggsurvfit() 
+```
+This tells us that the median time $\tau$ s.t. $\hat{S}_R(\tau) \leq 0.50$ is 24 months.  
+Meanwhile, we cannot estimate median time to death because the survival probability does not go below 0.50.
+
+# 2. Kaplan-Meier Survival Estimate
 
 
 
