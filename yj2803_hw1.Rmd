@@ -9,6 +9,8 @@ knitr::opts_chunk$set(echo = F, message = F, warning = F)
 
 library(tidyverse)
 library(ggplot2)
+library(knitr)
+library(km.ci)
 ```
 # 1. Exponential Density and Survival-related Functions
 (a) Let $\hat{\lambda}$ be the maximum likelihood estimator of the parameter $\lambda$.  
@@ -117,6 +119,40 @@ $c_j$: the number of censored observations between the $j$-th and $(j+1)$-st dea
 |180|1|1|3|`r round(1-1/3,3)`|`r round((1-1/17)*(1-1/16)*(1-1/15)*(1-1/14)*(1-1/13)*(1-1/12)*(1-1/9)*(1-1/8)*(1-1/7)*(1-1/5)*(1-1/4)*(1-1/3),3)`|
 |238|1|0|1|0|0|
 
+(b) I will use R to calculate $\hat{S}(t)$ and their pointwise 95% confidence intervals using the "log-log" approach ad the linear approach.  
+```{r echo=T}
+# set up data
+df2 <- data.frame(
+  t = c(2,3,4,12,22,48,51,56,80,85,90,94,160,171,180,180,238),
+  c = c(1,1,1,1,1,1,0,0,1,1,1,0,1,1,1,0,1) # 1: event, 0: censored
+)
 
+# fit KM curve
+surv <- Surv(df2$t, df2$c)
+km <- survfit(surv ~ 1)
+
+# log-log approach to obtain 95%CI 
+l_loglog <- km.ci(km, method = "loglog")$lower
+u_loglog <- km.ci(km, method = "loglog")$upper
+
+# linear approach to obtain 95%CI 
+l_linear <- km.ci(km, method = "linear")$lower
+u_linear <- km.ci(km, method = "linear")$upper
+
+# Create a table
+tb <- data.frame(
+  t = round(km$time,3), # time
+  st = round(km$surv,3), # survival
+  l_loglog = round(l_loglog, 3),
+  u_loglog = round(u_loglog, 3),
+  l_linear = round(l_linear, 3),
+  u_linear = round(u_linear, 3)
+)
+kable(tb, col.names = c("t", "S(t)", "Lower 95%CI (log-log)", "Upper 95%CI (log-log)", "Lower 95%CI (linear)", "Upper 95%CI (linear)"))
+```
+
+Log-log approach returns CIs within $[0,1]$, but linear approach returns some values outside $[0,1]$.
+
+(c)
 
 
