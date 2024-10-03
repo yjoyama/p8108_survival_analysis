@@ -302,4 +302,5 @@ ggplot(tb_hj, aes(x = tmj, y = hj_c)) +
 (c) The hazard for treatment response over time is not constant; it increases as time progresses. The plot in (b) does not appear to be linear. Therefore, the exponential model seem inappropriate for this data.
 
 # 4. Non-Informative and Informative Censoring
-
+Braitstein et al. pointed out that the mortality rate may have been underestimated by non-informative censoring, with previous study indicating higher mortality among children with LTFU. To address this, the authors attempted to locate them and collect information on the reason that had led to LTFU.  
+Brinkhof et al. also addressed the issue of potential bias caused by non-informative censoring due to LTFU. They adjusted for mortality by estimating the hazard ratio associated with LTFU and accommodated this by imputing missing data based on these estimates.
