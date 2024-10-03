@@ -11,6 +11,7 @@ library(tidyverse)
 library(ggplot2)
 library(knitr)
 library(km.ci)
+library(biostat3)
 ```
 # 1. Exponential Density and Survival-related Functions
 (a) Let $\hat{\lambda}$ be the maximum likelihood estimator of the parameter $\lambda$.  
@@ -249,6 +250,56 @@ kable(tb, col.names = c("$t_j$", "$\\hat{\\Lambda}_{NA}(t)$", "$\\hat{S}(t_j)$",
 The table indicates that both $\hat{S}(t_j)$ and $\hat{S}_{FH}(t_j)$ estimators show close agreement throughout much of the time period, especially for smaller values of $t_j$. 
 
 # 3. Lifetable (Actuarial) Survival Estimate
+1-month intervals: $[0,30), [30,60), [60,90), [90,120),[120, 150),[150, 180),[180, 210),[210, 240)$
+ 
+(a) The actuarial estimate of the survival function can be calculated by $\hat{S}(t)=\prod_{j: t_j \leq t} \left( 1 - \frac{d_j}{r_j} \right)$.
+```{r echo=T}
+# calculate variables for lifetable
+int = c("[0,30)", "[30,60)", "[60,90)", "[90,120)","[120, 150)","[150, 180)","[180, 210)","[210, 240)")
+j = 1:8
+dj = c(5, 1, 2, 1, 0, 2, 1, 1)
+cj = c(0, 2, 0, 1, 0, 0, 1, 0)
+rj = c(17, 12, 9, 7, 5, 5, 3, 1)
+s = cumprod(1 - dj/rj)
+
+# lifetable
+tb <- data.frame(
+  int, j, dj, cj, rj, round(s, 3)
+)
+kable(tb, col.names = c("$Days After Treatment$", "$j$", "$d_j$", "$c_j$", "$r_j$", "$\\hat{S}(t)$"), escape = FALSE)
+```
+
+(b) Let the width of the $j$-th interval be $b_j=t_j-t_{j-1}=30$ and the conditional probability of dying be $\hat{q}_j=d_j/r_j'$ where $r_j'=r_j-c_j/2$. Also, let $t_{mj}$ he the midpoint of $j$-th interval ($t_{mj}=\frac{t_j+t_{j-1}}{2}$).    
+The estimated hazard in the $j$-th interval is $\hat{\lambda}(t_{mj})=\frac{\hat{q_j}}{b_j(1-\hat{q_j}/2)}$.
+```{r echo=T, fig.width=7, fig.height=4.5}
+bj = 30
+rj_dash = rj - cj/2
+qj = dj/rj_dash
+tmj = c(15, 45, 75, 105, 135, 165, 195, 225)
+hj = qj/(bj*(1-qj/2)) # hazard
+hj_c = cumsum(hj)
+
+# prepare data for plot
+tb_hj <- data.frame(tmj, hj)
+tb_hj_c <- data.frame(tmj, hj_c)
+
+# plot 
+ggplot(tb_hj, aes(x = tmj, y = hj)) +
+  geom_step() +  
+  labs(title = "Pointwise Estimate of the Hazard Function", 
+       x = "Midpoint",
+       y = expression(hat(Lambda)(t))) +
+  theme_minimal()
+
+ggplot(tb_hj, aes(x = tmj, y = hj_c)) +
+  geom_step() + 
+  labs(title = "Cumulative Estimate of the Hazard Function", 
+       x = "Midpoint",
+       y = expression(hat(Lambda)(t))) +
+  theme_minimal()
+```
+
+(c) The hazard for treatment response over time is not constant; it increases as time progresses. The plot in (b) does not appear to be linear. Therefore, the exponential model seem inappropriate for this data.
 
 # 4. Non-Informative and Informative Censoring
 
