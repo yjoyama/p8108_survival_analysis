@@ -25,15 +25,9 @@ df = haven::read_dta("./data/MIstudy-1.dta")
 # 1. Logrank and Score Tests for MI Study
 (a) Below is the plot of estimated Kaplan-Meier survival functions for the endpoint of death for those who are obese or overweight ($BMI\geq 25$) vs. those of normal weight (which we will define here as $BMI<25$):
 ```{r echo=T, fig.height=6, fig.width=5.8}
-# prepare dataset for plot
-df1 = df |> 
-  mutate(
-    obese_ovwt2 = ifelse(bmi >= 25, 1, 0) # redefine obese_ovwt (1: BMI >= 25, 0: BMI < 25)
-  )
-
 # fit KM curve
-surv <- Surv(df1$dthtime, df1$dthstat)
-km <- survfit(surv ~ df1$obese_ovwt2) # compare two groups (obese or overweight vs. normal weight)
+surv <- Surv(df$dthtime, df$dthstat)
+km <- survfit(surv ~ df$obese_ovwt, df) # compare two groups (obese or overweight vs. normal weight)
 
 # plot the KM plot
 km |> 
@@ -65,12 +59,37 @@ pct_overweight_obese <- (overweight_obese_count / 500) * 100
 
 `r pct_overweight_obese`% of the patients out of 500 are either overweight or obese.
 
-(b)
+(b) I will implement log-rank test and Wilcoxon test using CMH approach. Below is the output from SAS.      
+```{r, echo=FALSE, out.width='50%', out.height='50%'}
+knitr::include_graphics("./image/surv_hw2_p1b.png")
+``` 
 
-(c)
+$\chi^2_{MH} = 41.4301$ (p-value <0.0001)  
+$\chi^2_{W}=43.6153$ (p-value <0.0001)
 
-(d)
+The both tests suggest that there is an association between whether being overweight/obese and death.  
+The log-rank test gives equal weight to all time points, while the Wilcoxon test gives more weight to early events. Given the KM curve, there is more differences in survival in early stage, so we can assume that Wilcoxon test would yield a larger test statistic. 
 
+(c)    
+```{r, echo=FALSE, out.width='50%', out.height='50%'}
+knitr::include_graphics("./image/surv_hw2_p1c00.png")
+knitr::include_graphics("./image/surv_hw2_p1c10.png")
+knitr::include_graphics("./image/surv_hw2_p1c11.png")
+```
+
+p=0, q=0: $\chi^2_{FH} = 41.4301$ (p-value <0.0001)   
+p=1, q=0: $\chi^2_{FH} = 42.6330$ (p-value <0.0001)   
+p=1, q=1: $\chi^2_{FH} = 30.0436$ (p-value <0.0001)  
+
+When p=0, q=0, the test statistic is equal to that of log-rank test. When p=1, q=0, the test is similar to the Peto-Prentice test and it is closer to the test statistic of Gehan's Wilcoxon test in (b). When p=1, q=1, the Fleming-Harrington test gives more weight to events happening around the median time. The smaller test statistic indicates fewer mid-term differences between two BMI groups.  
+If most events happen earlier, we expect p=1, q=0 to be more powerful than log-rank test, and if most events happen around the middle of the study period, we expect p=1, q=1 to be more powerful. Fleming-Harrington may be less powerful compared to log-rank test when most of the events occur later in the follow-up period.    
+
+(d) I will use a logistic regression model to test whether the proportions of deaths during follow-up differ for those who are over-weight/obese versus those of normal weight. 
+```{r}
+summary(glm(dthstat ~ obese_ovwt, df, family = binomial))
+```
+The result indicates that being over-weight/obese has approximately `r round((1-exp(-1.1732))*100, 2)`% lower odds of death compared to non-obese individuals when adjusting for no other variables, and this is statistically significant.  
+This conclusion (being over-weight/obese have somewhat positive effect on mortality) is similar to the results of survival analysis in (b) and (c). Survival analysis may become more powerful when there are considerable number of censoring in the study subject and the data is highly skewed.
 
 # 2. Cox Model for Myocardial Infarction Study
 (a)
@@ -82,7 +101,9 @@ pct_overweight_obese <- (overweight_obese_count / 500) * 100
 (d)
 
 # 3. Model Interpretation - Myocardial Infarction Study
-![Coefficient Estimate Table of Multivariable Model](./image/hw2_tb2.png)
+```{r, echo=FALSE, out.width='50%', out.height='50%'}
+knitr::include_graphics("./image/hw2_tb2.png")
+```
 
 (a)
 
@@ -96,3 +117,4 @@ pct_overweight_obese <- (overweight_obese_count / 500) * 100
 
 (f)
 
+# 4. Impact of Ties on Cox Model Estimation and Testing
