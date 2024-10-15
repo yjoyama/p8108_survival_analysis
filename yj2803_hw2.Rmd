@@ -92,9 +92,32 @@ The result indicates that being over-weight/obese has approximately `r round((1-
 This conclusion (being over-weight/obese have somewhat positive effect on mortality) is similar to the results of survival analysis in (b) and (c). Survival analysis may become more powerful when there are considerable number of censoring in the study subject and the data is highly skewed.
 
 # 2. Cox Model for Myocardial Infarction Study
-(a)
+(a) Below is the SAS output of Cox PH model and Wald, Score, and LR tests.   
+```{r, echo=FALSE, out.width='50%', out.height='50%'}
+knitr::include_graphics("./image/surv_hw2_p2a.png")
+```
 
-(b)
+Given the results of MLE, over-weight/obese individuals have hazard ratio of 0.422 (p-value <0.0001). In other words, over-weight/obese individuals have a `r round((1-0.422)*100,2)`% lower risk of death compared to normal-weight individuals.  
+
+Wald test: $\chi^2=38.9804$ (p-value <0.0001)  
+Score test: $\chi^2=41.4301$ (p-value <0.0001)  
+LR test: $\chi^2=39.0651$ (p-value <0.0001)  
+The three test indicates that the model including covariate `obese_ovwt` is significant. The score test has a test statistic that is exactly the same as the log-rank test from 1(b), because there is only one binary covariate in this model.
+
+(b) The adjusted Cox PH model (age, gender, systolic blood pressure, type of MI) is shown below:
+```{r, echo=FALSE, out.width='50%', out.height='50%'}
+knitr::include_graphics("./image/surv_hw2_p2b.png")
+```
+
+**Summary of findings**  
+Unadjusted HR: `obese_ovwt` 0.422 (95% CI: 0.322-0.544)   
+Adjusted HR: `obese_ovwt` 0.638 (95% CI: 0.479-0.851)  
+`age` 1.062 (95% CI: 1.048-1.075)   
+`gender` 0.887 (95% CI: 0.671-1.172)   
+`sysbp` 0.996 (95% CI: 0.992-1.001)   
+`mitype` 0.715 (95% CI: 0.510-1.002)  
+
+The unadjusted HR of overweight/obesity for mortality was 0.422 (95% CI: 0.322-0.544), indicating a significant protective effect. Adjusting for other covariates reduces the protective effect, but the HR remains significant at 0.638 (95% CI: 0.479-0.851), suggesting that adjustment for factors such as age and blood pressure slightly reduces but does not eliminate the association.  
 
 (c)
 
