@@ -155,11 +155,28 @@ In Cox PH model, by controlling for gender, the score test statistics increased 
 knitr::include_graphics("./image/hw2_tb2.png")
 ```
 
-(a)
+(a) Given the coefficient estimate table, the estimated hazard for death is:  
+$\lambda(t,Z)=\lambda_0(t)exp(\beta_1\cdot Age+\beta_2\cdot HR+\beta_3\cdot dBP+\beta_4\cdot Sex+\beta_5\cdot CHF+\beta_6\cdot BMI)$  
+$=\lambda_0(t)exp(0.05\cdot Age+0.0112\cdot HR-0.0107\cdot dBP-0.2732\cdot Sex+0.7816\cdot CHF-0.0453\cdot BMI)$
 
-(b)
+(b) "Baseline" group is defined as a model with the following values:  
+Age: `age` = 0  
+Heart rate: `hr` = 0   
+Diastolic BP: `diasp` = 0  
+Sex: `gender` = 0 (male)  
+Congestive heart failure: `chf` = 0 (no)  
+BMI: `bmi` = 0  
+There are no observations that fall into such a group.
 
-(c)
+(c) The estimated HR for death associated with `bmi` = 30 vs. `bmi` = 24, holding all other covatiates constant:  
+$HR = \frac{exp(0.05\cdot Age+0.0112\cdot HR-0.0107\cdot dBP-0.2732\cdot Sex+0.7816\cdot CHF-0.0453\times 30)}{exp(0.05\cdot Age+0.0112\cdot HR-0.0107\cdot dBP-0.2732\cdot Sex+0.7816\cdot CHF-0.0453\times 24)}$  
+$=exp(0.0453\times 30-0.0453\times 24)=$ `r round(exp(-0.0452*30+0.0453*24),2)`
+
+The 95% CI for this estimate can be obtained by calculating the following:  
+$L=exp(-0.0453\times 6-1.96\times 0.0163\times 6)=$ `r round(exp(-0.0453*6-1.96*0.0163*6), 2)`  
+$U=exp(-0.0453\times 6+1.96\times 0.0163\times 6)=$ `r round(exp(-0.0453*6+1.96*0.0163*6), 2)`
+
+The estimated HR 0.76 indicates that individuals with a BMI of 30 have a 24% lower hazard of death compared to individuals with a BMI of 24, all else being equal. The 95% CI is (0.63, 0.92), suggesting that this HR estimate is statistically significant.
 
 (d)
 
