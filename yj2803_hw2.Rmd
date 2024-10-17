@@ -168,7 +168,7 @@ Congestive heart failure: `chf` = 0 (no)
 BMI: `bmi` = 0  
 There are no observations that fall into such a group.
 
-(c) The estimated HR for death associated with `bmi` = 30 vs. `bmi` = 24, holding all other covatiates constant:  
+(c) The estimated HR for death associated with `bmi` = 30 vs. `bmi` = 24, holding all other covariates constant:  
 $HR = \frac{exp(0.05\cdot Age+0.0112\cdot HR-0.0107\cdot dBP-0.2732\cdot Sex+0.7816\cdot CHF-0.0453\times 30)}{exp(0.05\cdot Age+0.0112\cdot HR-0.0107\cdot dBP-0.2732\cdot Sex+0.7816\cdot CHF-0.0453\times 24)}$  
 $=exp(0.0453\times 30-0.0453\times 24)=$ `r round(exp(-0.0452*30+0.0453*24),2)`
 
@@ -178,7 +178,15 @@ $U=exp(-0.0453\times 6+1.96\times 0.0163\times 6)=$ `r round(exp(-0.0453*6+1.96*
 
 The estimated HR 0.76 indicates that individuals with a BMI of 30 have a 24% lower hazard of death compared to individuals with a BMI of 24, all else being equal. The 95% CI is (0.63, 0.92), suggesting that this HR estimate is statistically significant.
 
-(d)
+(d) The estimated HR of death for a subject aged 60 years vs. 50 years, holding all other covariates constant:  
+$HR = \frac{exp(0.05\times 60+0.0112\cdot HR-0.0107\cdot dBP-0.2732\cdot Sex+0.7816\cdot CHF-0.0453\cdot BMI)}{exp(0.05\times 50+0.0112\cdot HR-0.0107\cdot dBP-0.2732\cdot Sex+0.7816\cdot CHF-0.0453\cdot BMI)}$  
+$=exp(0.05\times 60-0.05\times 50)=$ `r round(exp(0.05*60-0.05*50),2)`
+
+The 95% CI for this estimate can be obtained by calculating the following:  
+$L=exp(0.05\times 10-1.96\times 0.0066\times 10)=$ `r round(exp(0.05*10-1.96*0.0066*10), 2)`  
+$U=exp(0.05\times 10+1.96\times 0.0066\times 10)=$ `r round(exp(0.05*10+1.96*0.0066*10), 2)` 
+
+The estimated HR 1.65 indicates that individuals aged 60 years have a 65% higher hazard of death compared to individuals aged 50 years, all else being equal. The 95% CI is (1.45, 1.88), suggesting that this HR estimate is statistically significant.
 
 (e)
 
