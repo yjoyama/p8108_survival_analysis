@@ -24,7 +24,7 @@ df = haven::read_dta("./data/MIstudy-1.dta")
 
 # 1. Logrank and Score Tests for MI Study
 (a) Below is the plot of estimated Kaplan-Meier survival functions for the endpoint of death for those who are obese or overweight ($BMI\geq 25$) vs. those of normal weight (which we will define here as $BMI<25$):
-```{r echo=T, fig.height=6, fig.width=5.8}
+```{r echo=F, fig.height=6, fig.width=5.8}
 # fit KM curve
 surv <- Surv(df$dthtime, df$dthstat)
 km <- survfit(surv ~ df$obese_ovwt, df) # compare two groups (obese or overweight vs. normal weight)
@@ -109,7 +109,7 @@ The three test indicates that the model including covariate `obese_ovwt` is sign
 knitr::include_graphics("./image/surv_hw2_p2b.png")
 ```
 
-**Summary of findings**  
+### Summary of findings 
 Unadjusted HR: `obese_ovwt` 0.422 (95% CI: 0.322-0.544)   
 Adjusted HR: `obese_ovwt` 0.638 (95% CI: 0.479-0.851)  
 `age` 1.062 (95% CI: 1.048-1.075)   
@@ -119,9 +119,36 @@ Adjusted HR: `obese_ovwt` 0.638 (95% CI: 0.479-0.851)
 
 The unadjusted HR of overweight/obesity for mortality was 0.422 (95% CI: 0.322-0.544), indicating a significant protective effect. Adjusting for other covariates reduces the protective effect, but the HR remains significant at 0.638 (95% CI: 0.479-0.851), suggesting that adjustment for factors such as age and blood pressure slightly reduces but does not eliminate the association.  
 
-(c)
+(c)   
 
-(d)
+i. Test for `obese_ovwt` from Cox PH model, stratifying by gender    
+```{r, echo=FALSE, out.width='50%', out.height='50%'}
+knitr::include_graphics("./image/surv_hw2_p2c1.png")
+```
+
+Score test statistic: $\chi^2=35.3698$ (p-value <0.001)    
+HR for `obese_ovwt`: 0.442 (p-value <0.001)   
+
+ii. Test for `obese_ovwt` from Cox PH model, controlling for gender   
+```{r, echo=FALSE, out.width='50%', out.height='50%'}
+knitr::include_graphics("./image/surv_hw2_p2c2.png")
+```
+
+Score test statistic: $\chi^2=43.8816$ (p-value <0.001)  
+HR for `obese_ovwt`: 0.442 (p-value <0.001)    
+HR for `gender`: 1.247 (p-value 0.1161)    
+
+iii. Log-rank test (linear rank) for `obese_ovwt`, stratifying by gender  
+```{r, echo=FALSE, out.width='50%', out.height='50%'}
+knitr::include_graphics("./image/surv_hw2_p2c3.png")
+```
+
+Log-rank (linear rank) $\chi^2=35.3698$ (p-value <0.0001)  
+
+Log-rank (linear rank) test statistic is equivalent to score test statistic in (i).  
+In Cox PH model, by controlling for gender, the score test statistics increased from 35.3698 to 43.8816, indicating a better fit with the data. This suggests that controlling for gender has a higher power than stratifying by it.  
+
+(d) 
 
 # 3. Model Interpretation - Myocardial Infarction Study
 ```{r, echo=FALSE, out.width='50%', out.height='50%'}
