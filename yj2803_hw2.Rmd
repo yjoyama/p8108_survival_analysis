@@ -192,6 +192,11 @@ The estimated HR 1.65 indicates that individuals aged 60 years have a 65% higher
 $HR = \frac{exp(0.05\times 60+0.0112\cdot HR-0.0107\cdot dBP-0.2732\times1+0.7816\cdot CHF-0.0453\times 24)}{exp(0.05\times 50+0.0112\cdot HR-0.0107\cdot dBP-0.2732\times 0+0.7816\cdot CHF-0.0453\times 30)}$  
 $=exp(0.05\times 60-0.2732\times1-0.0453\times 24-0.05\times 50+0.2732\times0+0.0453\times 30)=$ `r round(exp(0.05*60-0.2732-0.0453*24-0.05*50+0.0453*30),2)`
 
-(f)
+(f) Hazard ratio of female vs. male, holding all other variables constant: $HR=exp(-0.2732)=$ `r round(exp(-0.2732),2)`  
+95% CI for this:  
+$L=exp(-0.2732-1.96\times 0.1442)=$ `r round(exp(-0.2732-1.96*0.1442), 2)`  
+$U=exp(-0.2732+1.96\times 0.1442)=$ `r round(exp(-0.2732+1.96*0.1442), 2)` 
+
+The HR implies that, all else being equal, female is associated with 24% lower risk of death compared to male. However, the 95% CI includes 1 and suggests that this is not statistically significant.   
 
 # 4. Impact of Ties on Cox Model Estimation and Testing
