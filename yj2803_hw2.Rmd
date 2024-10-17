@@ -200,3 +200,19 @@ $U=exp(-0.2732+1.96\times 0.1442)=$ `r round(exp(-0.2732+1.96*0.1442), 2)`
 The HR implies that, all else being equal, female is associated with 24% lower risk of death compared to male. However, the 95% CI includes 1 and suggests that this is not statistically significant.   
 
 # 4. Impact of Ties on Cox Model Estimation and Testing
+I will fit a survival adjusted only for gender. Below is the result with ties handled by Breslow, exact, and Efron's methods.   
+```{r, echo=FALSE, out.width='50%', out.height='50%'}
+knitr::include_graphics("./image/surv_hw2_p31.png")
+knitr::include_graphics("./image/surv_hw2_p32.png")
+knitr::include_graphics("./image/surv_hw2_p33.png")
+```
+
+As we can see, the parameter estimates and the $\chi^2$ test statistics are quite similar across all three methods (with exact and Efron's method being identical). In this study, ties do not appear to be a significant issue. However, ties could become problematic in studies with a higher frequency of tied event times.
+
+
+
+
+
+
+
+
