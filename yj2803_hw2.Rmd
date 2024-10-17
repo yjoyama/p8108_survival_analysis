@@ -148,7 +148,7 @@ Log-rank (linear rank) $\chi^2=35.3698$ (p-value <0.0001)
 Log-rank (linear rank) test statistic is equivalent to score test statistic in (i).  
 In Cox PH model, by controlling for gender, the score test statistics increased from 35.3698 to 43.8816, indicating a better fit with the data. This suggests that controlling for gender has a higher power than stratifying by it.  
 
-(d) 
+(d) Stratification allows the baseline hazard to vary by gender, which is beneficial when gender is a strong confounder for the outcome and the proportional hazards assumption does not hold across genders. One of the disadvantages is the potential loss of power, as seen in (c), due to the smaller size within each stratum. To further examine whether stratification is appropriate, I would suggest testing the proportional hazards assumption, such as using the Schoenfeld residual test.
 
 # 3. Model Interpretation - Myocardial Infarction Study
 ```{r, echo=FALSE, out.width='50%', out.height='50%'}
