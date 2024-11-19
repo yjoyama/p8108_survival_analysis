@@ -175,11 +175,58 @@ The treatment effect alone (unadjusted) shows a significant reduction in the ris
 
 
 # 2. Evaluating Linearity of CD4 Effects
-a. 
-b. 
-c. 
-d. 
+a. CD4 as continuous, on original scale and square root transformation
+```{r}
+# original scale
+cd4_cont <- coxph(Surv(time, censor) ~ cd4 + age + ivdu + karnof + trt, data = df)
 
+# square root transformation
+df$sqrt_cd4 <- sqrt(df$cd4)
+cd4_sqrt <- coxph(Surv(time, censor) ~ sqrt_cd4 + age + ivdu + karnof + trt, data = df)
+```
+
+
+b. CD4 as ordinal (with levels 1=<50, 2=50-100, and 3=> 100.)
+```{r}
+df$cd4_ordinal <- cut(df$cd4, breaks = c(-Inf, 50, 100, Inf), labels = c(1, 2, 3), right = FALSE)
+cd4_ordinal <- coxph(Surv(time, censor) ~ cd4_ordinal + age + ivdu + karnof + trt, data = df)
+```
+
+
+c. CD4 as categorical (create indicators for <50 and 50-100)
+```{r}
+df$cd4_under50 <- ifelse(df$cd4 < 50, 1, 0)
+df$cd4_50_100 <- ifelse(df$cd4 >= 50 & df$cd4 <= 100, 1, 0)
+cd4_cat <- coxph(Surv(time, censor) ~ cd4_under50 + cd4_50_100 + age + ivdu + karnof + trt, data = df)
+```
+
+d. CD4 as linear and quadratic terms (cd4 and cd4^2)
+```{r}
+df$cd4_squared <- df$cd4^2
+cd4_quad <- coxph(Surv(time, censor) ~ cd4 + cd4_squared + age + ivdu + karnof + trt, data = df)
+```
+
+```{r}
+# summary table for comparison
+data.frame(
+  Model = c("Continuous (original)", "Square Root", "Ordinal", "Categorical", "Linear + Quadratic"),
+  Minus2LogL = c(
+    -2 * logLik(cd4_cont),
+    -2 * logLik(cd4_sqrt),
+    -2 * logLik(cd4_ordinal),
+    -2 * logLik(cd4_cat),
+    -2 * logLik(cd4_quad)
+  ),
+  AIC = c(
+    AIC(cd4_cont),
+    AIC(cd4_sqrt),
+    AIC(cd4_ordinal),
+    AIC(cd4_cat),
+    AIC(cd4_quad)
+  )
+) |> kable()
+```
+The Continuous (original) model for CD4 is preferred as it provides the best prediction based on AIC and simplicity, while maintaining comparable fit to the data. The Linear + Quadratic model, while slightly more flexible, does not justify its added complexity given the small difference in fit.
 
 # 3. Predicted Time to AIDS or Death Under PH and KM
 
