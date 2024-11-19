@@ -16,6 +16,7 @@ library(tidyverse)
 library(ggplot2)
 library(knitr)
 library(survival)
+library(survminer)
 library(ggsurvfit)
 ```
 
@@ -229,7 +230,81 @@ data.frame(
 The Continuous (original) model for CD4 is preferred as it provides the best prediction based on AIC and simplicity, while maintaining comparable fit to the data. The Linear + Quadratic model, while slightly more flexible, does not justify its added complexity given the small difference in fit.
 
 # 3. Predicted Time to AIDS or Death Under PH and KM
+```{r}
+# define CD4 category as in part 2b
+df$cd4_cat <- cut(df$cd4, breaks = c(-Inf, 50, 100, Inf), labels = c("1", "2", "3"), right = FALSE)
 
+# define Karnofsky score category
+df$karnof100 <- ifelse(df$karnof == 100, 1, 0)
+```
+
+I will fit the cox model with treatment, CD4 category, and Karnofsky score (100 vs. lower).
+```{r}
+cox_model <- coxph(Surv(time, censor) ~ cd4_cat + trt + karnof100, data = df)
+
+summary(cox_model)
+```
+
+Now, let's calculate the predicted probability of remaining alive and AIDS-free for each combination of these covariates at 6 months and 1 year.
+```{r}
+# create a new data frame for prediction
+pred_dat <- expand.grid(
+  time = c(6, 12),
+  censor = c(0, 1),
+  cd4_cat = c("1", "2", "3"),  
+  trt = c(0, 1),               
+  karnof100 = c(0, 1)         
+)
+
+# predict survival probabilities
+preds <- predict(cox_model, newdata = pred_dat, type = "expected", se.fit = TRUE)
+
+# convert predicted survival probabilities
+pred_dat$prob <- exp(-preds$fit) # survival probability: exp(-expected risk)
+print(pred_dat)
+
+# calculate survival estimates under KM
+# fit KM survival curves stratified by CD4 category, treatment, and Karnofsky score
+pred_dat <- expand.grid(
+  time = c(6, 12),
+  censor = c(0, 1),
+  cd4_cat = c("1", "2", "3"),  
+  trt = c(0, 1),               
+  karnof100 = c(0, 1)         
+)
+
+km_fit <- survfit(Surv(time, censor) ~ cd4_cat + trt + karnof100, data = df)
+summary(km_fit, 6)
+summary(km_fit, 12)
+```
+
+The summary table is shown below. 
+```{r, echo=FALSE, out.width='100%'}
+knitr::include_graphics("./image/hw3_3.png")
+```
+
+The baseline is CD4 category <50, Karnofsky 70-90, and treatment without IDV. The table shows that subgroup with CD4 <50, Karnofsky 70-90, treatment without IDV has the highest risk of AIDS or death at 12 months. 
+
+To calculate the 6-month survival probability for a specific group using the predicted survival of a baseline group in the Cox PH model, I will use the hazard ratios from the model. 
+
+The survival probability for a specific group is given by:
+$S(6) = S_0(6)^{\exp(X \beta)}$
+
+Where:
+
+- $S(6)$: Survival probability at 6 months
+- $S_0(6)$: Baseline survival probability at 6 months
+- $X$: Covariate vector
+- $\beta$: Coefficient vector from the Cox model
+
+```{r}
+# baseline survival probability at 6 month
+summary(survfit(cox_model), times = 6)$surv
+```
+
+Since subgroup with CD4 <50, Karnofsky 70-90, treatment without IDV is the baseline group, ${\exp(X \beta)}=e^0=1$. Therefore, $S(6) = 0.8058679^1\approx0.81$. This is what we have in the table. 
+
+The KM method shows slightly lower survival probabilities at 6 months for subgroups with lower Karnofsky scores or no IDV treatment compared to PH estimates. This suggests that the proportional hazards assumption in the Cox model may overestimate survival for some groups. At 12 months, KM estimates are unavailable for many subgroups due to insufficient follow-up data, while PH estimates can extrapolate survival probabilities based on model assumptions. Both methods consistently show better survival with higher CD4 count, IDV treatment and higher Karnofsky scores.
 
 # 4. Assessing the Proportional Hazards Assumption
 a. 
