@@ -1,5 +1,5 @@
 ---
-title: "Homework3"
+title: "Final Project"
 author: "Yuki Joyama"
 output: 
   pdf_document:
@@ -18,33 +18,3 @@ library(knitr)
 library(survival)
 library(ggsurvfit)
 ```
-
-```{r}
-# import MI data
-df = haven::read_dta("./data/actg320.dta")
-```
-
-# 1. Model Selection
-
-
-# 2. Evaluating Linearity of CD4 Effects
-a. 
-b. 
-c. 
-d. 
-
-
-# 3. Predicted Time to AIDS or Death Under PH and KM
-
-
-# 4. Assessing the Proportional Hazards Assumption
-
-
-# 5. Evaluating Fit of the Final Model
-
-
-
-
-
-
-
