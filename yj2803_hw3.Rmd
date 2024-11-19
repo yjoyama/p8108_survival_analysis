@@ -18,6 +18,7 @@ library(knitr)
 library(survival)
 library(survminer)
 library(ggsurvfit)
+library(flexsurv)
 ```
 
 ```{r}
@@ -417,10 +418,50 @@ Interaction term is not statistically significant, suggesting a weak evidence of
 (a)-(c) imply that the PH assumption is violated.
 
 # 5. Evaluating Fit of the Final Model
+## Deviance residuals
+```{r}
+cox_model <- coxph(Surv(time, censor) ~ trt + karnof + cd4 + age + ivdu, data = df)
 
+ggcoxdiagnostics(
+  cox_model,
+  type = c("deviance")
+  )
+```
+Deviance residuals plot shows some asymmetry and a few outliers on the higher end of the residual scale. This indicates that some individuals may not align perfectly with the assumptions of the model, but the majority of the residuals cluster around zero, suggesting an overall reasonable fit.
 
+## Cox-Snell generalized residuals
+```{r}
+fitg <- flexsurvreg(formula = Surv(time, censor) ~ trt + karnof + cd4 + age + ivdu, 
+                    data = df, dist = "gengamma")
+cs <- coxsnell_flexsurvreg(fitg)
 
+surv <- survfit(Surv(cs$est, df$censor) ~ 1)
+plot(surv, fun="cumhaz")
+abline(0, 1, col="red")
+```
+The Cox-Snell residuals follow the expected cumulative hazard reasonably well, although there are some deviations at higher survival probabilities. 
 
+## Influence diagnostics
+```{r}
+# extract influence measures
+influence_measures <- cox.zph(cox_model, transform = "identity")
+
+# calculate DFBETAs 
+dfbetas <- residuals(cox_model, type = "dfbetas") 
+colnames(dfbetas) <- c("trt", "karnof", "cd4", "age", "ivdu")
+
+# plot DFBETAs for each coefficient
+par(mfrow = c(2, 3)) 
+for (i in 1:ncol(dfbetas)) {
+  plot(dfbetas[, i], main = paste("DFBETAs for", colnames(dfbetas)[i]),
+       xlab = "Observation", ylab = "DFBETA", pch = 20)
+  abline(h = 0, col = "red")
+}
+par(mfrow = c(1, 1)) 
+```
+The DFBETAs indicate that certain observations (outliers) have substantial influence on specific coefficients such as cd4 and ivdu. These patients could potentially distort the model results.
+
+In conclusion, the model provides a reasonable fit to the data, but the presence of influential observations suggests that the final model may be sensitive to these outliers. 
 
 
 
