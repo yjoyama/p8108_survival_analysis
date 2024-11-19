@@ -307,9 +307,114 @@ Since subgroup with CD4 <50, Karnofsky 70-90, treatment without IDV is the basel
 The KM method shows slightly lower survival probabilities at 6 months for subgroups with lower Karnofsky scores or no IDV treatment compared to PH estimates. This suggests that the proportional hazards assumption in the Cox model may overestimate survival for some groups. At 12 months, KM estimates are unavailable for many subgroups due to insufficient follow-up data, while PH estimates can extrapolate survival probabilities based on model assumptions. Both methods consistently show better survival with higher CD4 count, IDV treatment and higher Karnofsky scores.
 
 # 4. Assessing the Proportional Hazards Assumption
-a. 
-b. 
-c. 
+## The effect of treatment on AIDS-free survival
+a. Creating a plot of log[−log(Sˆ(t)] versus log(t) for each treatment arm
+```{r}
+# fit Kaplan-Meier survival curves stratified by treatment
+km_fit <- survfit(Surv(time, censor) ~ trt, data = df)
+
+# plot log[-log(S(t))] vs log(t)
+plot(km_fit, fun = "cloglog", xlab = "Time (in months) using log",
+     ylab = "log-log survival", main = "log-log curve by treatment")
+```
+
+The curves appear to be non-parallel, suggesting a potential violation of the PH assumption. 
+
+b. Evaluating weighted Schoenfeld residuals over time
+```{r}
+# test the proportional hazards assumption 
+cox_model <- coxph(Surv(time, censor) ~ trt , data = df)
+cox_zph <- cox.zph(cox_model)
+
+# summary of Schoenfeld residuals
+print(cox_zph)
+
+# plot Schoenfeld residuals for treatment
+plot(cox_zph, var = "trt", main = "Schoenfeld Residuals for Treatment")
+
+
+# test the proportional hazards assumption (with adjustment)
+cox_model <- coxph(Surv(time, censor) ~ trt + cd4_cat + karnof100, data = df)
+cox_zph <- cox.zph(cox_model)
+
+# summary of Schoenfeld residuals
+print(cox_zph)
+
+# plot Schoenfeld residuals for treatment
+plot(cox_zph, var = "trt", main = "Schoenfeld Residuals for Treatment")
+```
+
+The both plots there appears to be a trend in residuals over time, which indicates that the effect of treatment may vary with time. Hence, PH assumption may be violated. 
+
+c. Including an interaction with time and treatment
+```{r}
+# add interaction term between treatment and time
+cox_int <- coxph(Surv(time, censor) ~ trt * time + cd4_cat + karnof100, data = df)
+
+# summary of the model with interaction
+summary(cox_int)
+```
+Including an interaction term between treatment and time in the Cox model provided a hazard ratio for the interaction ($HR = 0.91$), indicating a slight decrease in the treatment effect over time, but this result was not statistically significant. It suggests weak evidence of time-dependency in the treatment effect.  
+
+```{r}
+km_fit <- survfit(Surv(time, censor) ~ trt, data = df)
+summary(km_fit, 3)
+summary(km_fit, 6)
+summary(km_fit, 9)
+
+# HR
+-log(0.964) / -log(0.948) # at 3 month
+-log(0.949) / -log(0.9057) # at 6 month
+-log(0.937) / -log(0.8752) # at 9 month
+```
+The predicted HR for 3, 6, and 9 months are 0.69, 0.53, and 0.49, accordingly. 
+
+Overall, (a)-(c) imply that the PH assumption is violated. 
+
+## The effect of CD4 count on AIDS-free survival
+a. Creating a plot of log[−log(Sˆ(t)] versus log(t) for each treatment arm
+```{r}
+# fit Kaplan-Meier survival curves stratified by treatment
+km_fit <- survfit(Surv(time, censor) ~ cd4_cat, data = df)
+
+# plot log[-log(S(t))] vs log(t)
+plot(km_fit, fun = "cloglog", xlab = "Time (in months) using log",
+     ylab = "log-log survival", main = "log-log curve by CD4 categories")
+```
+
+The curves appear to be non-parallel, suggesting a potential violation of the PH assumption. 
+
+b. Evaluating weighted Schoenfeld residuals over time
+```{r}
+df_cd4 = df |> 
+  mutate(
+    cd4 = cd4/50 # divide cd4 by 50
+  )
+
+# test the proportional hazards assumption
+cox_model <- coxph(Surv(time, censor) ~ cd4, data = df_cd4)
+cox_zph <- cox.zph(cox_model)
+
+# summary of Schoenfeld residuals
+print(cox_zph)
+
+# plot Schoenfeld residuals for treatment
+plot(cox_zph, var = "cd4", main = "Schoenfeld Residuals for Treatment")
+
+```
+There appears to be a trend in residuals over time, which indicates that the effect of treatment may vary with time. PH assumption may be violated.
+
+c. Including an interaction with time and treatment
+```{r}
+# add interaction term between treatment and time
+cox_int <- coxph(Surv(time, censor) ~ cd4 * trt, data = df)
+
+# summary of the model with interaction
+summary(cox_int)
+```
+Interaction term is not statistically significant, suggesting a weak evidence of treatment-dependency in the CD4 count. 
+
+(a)-(c) imply that the PH assumption is violated.
 
 # 5. Evaluating Fit of the Final Model
 
