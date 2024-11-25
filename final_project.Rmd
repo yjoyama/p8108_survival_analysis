@@ -12,9 +12,144 @@ editor_options:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = F, message = F, warning = F)
 
+library(readr)
 library(tidyverse)
 library(ggplot2)
 library(knitr)
 library(survival)
 library(ggsurvfit)
+library(gtsummary)
+library(officer)
+library(flextable)
+library(corrplot)
+library(gridExtra)
 ```
+
+```{r}
+df = read_csv("./data/Breast Cancer METABRIC.csv") |> 
+  janitor::clean_names() |> 
+  mutate(across(where(is.character), as.factor)) |> 
+  as.data.frame()
+```
+
+# Table 1 
+```{r}
+theme_gtsummary_journal(journal = "nejm")
+
+tb1 = df |> 
+  dplyr::filter(cancer_type == "Breast Cancer") |> 
+  select(
+    chemotherapy, age_at_diagnosis, sex, inferred_menopausal_state, 
+    cancer_type_detailed, primary_tumor_laterality, tumor_size, 
+    tumor_stage, cellularity, pam50_claudin_low_subtype, er_status, 
+    neoplasm_histologic_grade, her2_status, tumor_other_histologic_subtype, 
+    hormone_therapy, type_of_breast_surgery, radio_therapy, 
+    lymph_nodes_examined_positive, mutation_count, 
+    nottingham_prognostic_index, pr_status
+  ) |> 
+  tbl_summary(
+    by = chemotherapy,
+    statistic = list(
+      all_continuous() ~ "{mean} ({sd})",
+      all_categorical() ~ "{n} ({p})"
+    ),
+    digits = all_continuous() ~ 1,
+    label = list(
+      age_at_diagnosis ~ "Age at diagnosis", 
+      sex ~ "Sex", 
+      inferred_menopausal_state ~ "Menopausal status", 
+      cancer_type_detailed ~ "Cancer type", 
+      primary_tumor_laterality ~ "Primary tumor laterality", 
+      tumor_size ~ "Tumor size", 
+      tumor_stage ~ "Tumor stage", 
+      cellularity ~ "Cellularity", 
+      pam50_claudin_low_subtype ~ "PAM50 claudin-low subtype", 
+      er_status ~ "ER status", 
+      pr_status ~ "PR status",
+      her2_status ~ "HER2 status", 
+      neoplasm_histologic_grade ~ "Histologic grade", 
+      tumor_other_histologic_subtype ~ "Other histologic subtype", 
+      hormone_therapy ~ "Hormone therapy", 
+      type_of_breast_surgery ~ "Breast surgery", 
+      radio_therapy ~ "Radiotherapy", 
+      lymph_nodes_examined_positive ~ "Lymph nodes involvement", 
+      mutation_count ~ "Mutations", 
+      nottingham_prognostic_index ~ "Nottingham prognostic index"
+    )
+  ) |> 
+  add_p() |> 
+  as_flex_table() |> 
+  line_spacing(space = 0.5, part = "body")
+
+tb1 |> save_as_docx(path = "./tb1.docx")
+```
+
+```{r}
+# Subset the data with updated variable names
+df_eda <- read_csv("./data/Breast Cancer METABRIC.csv") |> 
+  mutate(across(where(is.character), as.factor)) |> 
+  as.data.frame() |> 
+  dplyr::filter(`Cancer Type` == "Breast Cancer") |> 
+  select(
+    `Chemotherapy`, `Age at Diagnosis`, Sex, `Inferred Menopausal State`, 
+    `Cancer Type Detailed`, `Primary Tumor Laterality`, `Tumor Size`, 
+    `Tumor Stage`, Cellularity, `Pam50 + Claudin-low subtype`, `ER Status`, 
+    `Neoplasm Histologic Grade`, `HER2 Status`, `Tumor Other Histologic Subtype`, 
+    `Hormone Therapy`, `Type of Breast Surgery`, `Radio Therapy`, 
+    `Lymph nodes examined positive`, `Mutation Count`, 
+    `Nottingham prognostic index`, `PR Status`
+  )
+
+# Separate numerical and categorical variables
+numerical_vars <- c("Age at Diagnosis", "Tumor Size", 
+                    "Mutation Count", "Nottingham prognostic index", 
+                    "Lymph nodes examined positive")
+categorical_vars <- setdiff(names(df_eda), numerical_vars)
+
+# Ensure categorical variables are factors
+df_selected <- df_eda |> mutate(across(all_of(categorical_vars), as.factor))
+
+# List to store ggplot objects
+plots <- list()
+
+# Generate plots
+for (num_var in numerical_vars) {
+  # Box plot by chemotherapy group
+  p_box <- df_selected |> 
+    ggplot(aes(x = `Chemotherapy`, y = .data[[num_var]], fill = `Chemotherapy`)) +
+    geom_boxplot(alpha = 0.7) +
+    labs(
+      title = paste(num_var),
+      x = "Chemotherapy",
+      y = num_var
+    ) +
+    theme_minimal() +
+    theme(legend.position = "none")
+  
+  # Store plots in the list
+  plots <- c(plots, list(p_box))
+}
+
+p_hist <- df_eda |> 
+    ggplot(aes(x = `Tumor Stage`, fill = `Chemotherapy`)) +
+    geom_histogram(bins = 20, alpha = 0.7) +
+    labs(
+      title = "Tumor stage",
+      x = "Tumor stage",
+      y = "Count"
+    ) +
+    theme_minimal() +
+    theme(legend.position = "top")
+
+plots <- c(plots, list(p_hist, p_box))
+
+# Arrange all plots in a grid
+grid.arrange(grobs = plots, ncol = 3)
+
+# Visualize correlation matrix
+corr_matrix <- cor(df_selected[numerical_vars], use = "complete.obs")
+corrplot(corr_matrix, method = "circle", type = "upper", 
+         tl.cex = 0.8, number.cex = 0.7, addCoef.col = "black")
+
+```
+
