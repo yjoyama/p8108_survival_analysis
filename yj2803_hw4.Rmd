@@ -165,10 +165,104 @@ cat("p-value:", p_value)
 
 Given p-value < 0.05, we reject the null hypothesis and conclude that generalized gamma model provides a better fit compared to the Weibull model.  
 
-
 ## b.
+Time ratio: $\phi = e^\beta$
+```{r}
+# function to compute time ratio and confidence interval
+tr_ci <- function(model) {
+  # extract coefficient and standard error for ivdrug
+  beta <- model$res["ivdrug", "est"]
+  se <- model$res["ivdrug", "se"]
+  
+  # compute time ratio (phi) and 95% confidence interval
+  phi <- exp(beta)
+  ci_lower <- exp(beta - 1.96 * se)
+  ci_upper <- exp(beta + 1.96 * se)
+  
+  # return as a named vector
+  c("Time Ratio (phi)" = phi, 
+    "95% CI Lower" = ci_lower, 
+    "95% CI Upper" = ci_upper)
+}
+
+# apply the function to all models
+results <- data.frame(
+  Model = c("Exponential", "Weibull", "Log-logistic", "Log-normal", "Generalized Gamma"),
+  rbind(
+    tr_ci(aft_exponential),
+    tr_ci(aft_weibull),
+    tr_ci(aft_llogis),
+    tr_ci(aft_lognormal),
+    tr_ci(aft_gen_gamma)
+  )
+)
+
+colnames(results) = c("Model", "Time Ratio (phi)", "95% CI Lower", "95% CI Upper")
+
+results |> 
+  kable()
+```
+
+In the Wibull model, the estimated $\phi$ for the `ivdrug` covariate is 0.653 (95%CI: 0.527-0.808). On average, individuals with IV drug use have survival times that are about 65.3% of those without IV drug use, after adjusting for other covariates. This association is statistically significant.
 
 ## c. 
+Exponential model  
+$\beta_{HR}=\beta_{AFT}$  
+$HR=e^{\beta_{HR}}=e^{\beta_{AFT}}$  
+95%CI = $e^{\beta_{HR}\pm1.96\times SE_{HR}}$
+```{r}
+# extract AFT beta and SE for IV drug use (exponential model)
+beta_aft_exp <- aft_exponential$res["ivdrug", "est"]
+se_aft_exp <- aft_exponential$res["ivdrug", "se"]
+
+# log-hazard ratio for exponential 
+beta_hr_exp <- beta_aft_exp
+
+# HR and 95% CI 
+hr_exp <- exp(beta_hr_exp)
+hr_exp_ci <- exp(c(beta_hr_exp - 1.96 * se_aft_exp, beta_hr_exp + 1.96 * se_aft_exp))
+```
+
+
+Webull model  
+$\beta_{HR}=-\beta_{AFT}/\alpha$, where $\alpha = \text{shape parameter}$    
+$HR=e^{\beta_{HR}}= e^{\beta_{AFT}/\alpha}$   
+95%CI = $e^{\beta_{HR}\pm1.96\times SE_{HR}}$
+```{r}
+# extract AFT beta and SE for IV drug use (Weibull model)
+beta_aft_weib <- aft_weibull$res["ivdrug", "est"]
+se_aft_weib <- aft_weibull$res["ivdrug", "se"]
+
+# extract Weibull shape parameter
+alpha <- aft_weibull$res["shape", "est"]
+
+# log-hazard ratio for Weibull
+beta_hr_weib <- -beta_aft_weib / alpha
+se_hr_weib <- se_aft_weib / alpha
+
+# HR and 95% CI 
+hr_weib <- exp(beta_hr_weib)
+hr_weib_ci <- exp(c(beta_hr_weib - 1.96 * se_hr_weib, beta_hr_weib + 1.96 * se_hr_weib))
+```
+
+Results:
+```{r}
+# summarize results
+results <- data.frame(
+  Model = c("Exponential", "Weibull"),
+  "Log-HR" = c(beta_hr_exp, beta_hr_weib),
+  "HR" = c(hr_exp, hr_weib),
+  "95% CI Lower" = c(hr_exp_ci[1], hr_weib_ci[1]),
+  "95% CI Upper" = c(hr_exp_ci[2], hr_weib_ci[2])
+)
+
+colnames(results) = c("Model", "Log-HR", "HR", "95% CI Lower", "95% CI Upper")
+
+results |> 
+  kable()
+```
+
+In the exponential model, the HR for IV drug use is 1.52 (95% CI: 1.24–1.87), indicating that individuals with IV drug use have a 52% higher hazard of the event compared to those without IV drug use, holding other variables constant. Similarly, in the Weibull model, the HR is 1.55 (95% CI: 1.25–1.94), showing consistent evidence of increased hazard associated with IV drug use.
 
 ## d.
 
