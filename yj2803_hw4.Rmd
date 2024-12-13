@@ -16,9 +16,10 @@ library(tidyverse)
 library(ggplot2)
 library(knitr)
 library(survival)
-library(survminer)
+library(flexsurv)
 library(ggsurvfit)
 library(flexsurv)
+library(knitr)
 ```
 
 ```{r}
@@ -37,21 +38,59 @@ Models: Exponential, Weibull, Log-logistic, Log-normal, Generalized Gamma
 surv_object <- Surv(time = df$time, event = df$censor)
 
 # fit AFT models with different distributions
-aft_exponential <- survreg(surv_object ~ age + nonwhite + treat + site + ivdrug, data = df, dist = "exponential")
-aft_weibull <- survreg(surv_object ~ age + nonwhite + treat + site + ivdrug, data = df, dist = "weibull")
-aft_loglogistic <- survreg(surv_object ~ age + nonwhite + treat + site + ivdrug, data = df, dist = "loglogistic")
-aft_lognormal <- survreg(surv_object ~ age + nonwhite + treat + site + ivdrug, data = df, dist = "lognormal")
-aft_gen_gamma <- flexsurvreg(surv_object ~ age + nonwhite + treat + site + ivdrug, data = df, dist = "gengamma")
+aft_exponential <- 
+  flexsurvreg(surv_object ~ age + nonwhite + treat + site + ivdrug, data = df, dist = "exponential")
+aft_weibull <- 
+  flexsurvreg(surv_object ~ age + nonwhite + treat + site + ivdrug, data = df, dist = "weibull")
+aft_llogis <- 
+  flexsurvreg(surv_object ~ age + nonwhite + treat + site + ivdrug, data = df, dist = "llogis")
+aft_lognormal <- 
+  flexsurvreg(surv_object ~ age + nonwhite + treat + site + ivdrug, data = df, dist = "lognormal")
+aft_gen_gamma <- 
+  flexsurvreg(surv_object ~ age + nonwhite + treat + site + ivdrug, data = df, dist = "gengamma")
 
-# summarize the results
-summary(aft_exponential)
-summary(aft_weibull)
-summary(aft_loglogistic)
-summary(aft_lognormal)
-summary(aft_gen_gamma)
+# check the results 
+# aft_exponential
+# aft_weibull
+# aft_llogis
+# aft_lognormal
+# aft_gen_gamma
 ```
 
-### i.
+### i. Values of the -2 log L, the total number of parameters (including shape and scale for $\epsilon$) and the AIC for each of these models
+```{r}
+# extract the log-likelihood, total parameters, and AIC
+results <- data.frame(
+  Model = c("Exponential", "Weibull", "Log-logistic", "Log-normal", "Generalized Gamma"),
+  "-2LogL" = c(
+    -2 * aft_exponential$loglik,
+    -2 * aft_weibull$loglik,
+    -2 * aft_llogis$loglik,
+    -2 * aft_lognormal$loglik,
+    -2 * aft_gen_gamma$loglik
+  ),
+  "Total Parameters" = c(
+    aft_exponential$npars, 
+    aft_weibull$npars,
+    aft_llogis$npars,
+    aft_lognormal$npars,
+    aft_gen_gamma$npars
+  ),
+  AIC = c(
+    aft_exponential$AIC,
+    aft_weibull$AIC,
+    aft_llogis$AIC,
+    aft_lognormal$AIC,
+    aft_gen_gamma$AIC
+  )
+) 
+
+colnames(results) <- c("Model", "-2 Log L", "Total Parameters", "AIC")
+
+results |> 
+  kable()
+```
+
 
 ### ii.
 
