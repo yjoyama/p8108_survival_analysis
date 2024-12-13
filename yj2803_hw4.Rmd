@@ -264,7 +264,278 @@ results |>
 
 In the exponential model, the HR for IV drug use is 1.52 (95% CI: 1.24–1.87), indicating that individuals with IV drug use have a 52% higher hazard of the event compared to those without IV drug use, holding other variables constant. Similarly, in the Weibull model, the HR is 1.55 (95% CI: 1.25–1.94), showing consistent evidence of increased hazard associated with IV drug use.
 
-## d.
+## d. Cox PH Model
+Covariates: `age`, `nonwhite`, `treat`, `site`, `ivdrug`  
+
+```{r}
+# fit cox ph model with five covariates
+cox_model = coxph(surv_object ~ age + nonwhite + treat + site + ivdrug, data = df)
+
+# check the cox ph model
+cox_model
+
+# extract HR and 95% CI 
+cox_hr <- exp(coef(cox_model)["ivdrug"])
+cox_ci <- exp(confint(cox_model)["ivdrug", ])
+
+# combine results for comparison
+results_ivdrug <- data.frame(
+  Covariate = "IV drug use",
+  Cox_HR = cox_hr,
+  Cox_CIL = cox_ci[1],
+  Cox_CIU = cox_ci[2], 
+  Exp_HR = results[1, 3],
+  Exp_CIL = results[1, 4],
+  Exp_CIU = results[1, 5],
+  Wei_HR = results[2, 3],
+  Wei_CIL = results[2, 4],
+  Wei_CIU = results[2, 5]
+) 
+
+# iterate for other variables
+# age
+# extract AFT beta and SE for age (exponential model)
+beta_aft_exp <- aft_exponential$res["age", "est"]
+se_aft_exp <- aft_exponential$res["age", "se"]
+
+# log-hazard ratio for exponential 
+beta_hr_exp <- beta_aft_exp
+
+# HR and 95% CI 
+hr_exp <- exp(beta_hr_exp)
+hr_exp_ci <- exp(c(beta_hr_exp - 1.96 * se_aft_exp, beta_hr_exp + 1.96 * se_aft_exp))
+
+# extract AFT beta and SE for age (Weibull model)
+beta_aft_weib <- aft_weibull$res["age", "est"]
+se_aft_weib <- aft_weibull$res["age", "se"]
+
+# extract Weibull shape parameter
+alpha <- aft_weibull$res["shape", "est"]
+
+# log-hazard ratio for Weibull
+beta_hr_weib <- -beta_aft_weib / alpha
+se_hr_weib <- se_aft_weib / alpha
+
+# HR and 95% CI 
+hr_weib <- exp(beta_hr_weib)
+hr_weib_ci <- exp(c(beta_hr_weib - 1.96 * se_hr_weib, beta_hr_weib + 1.96 * se_hr_weib))
+
+results <- data.frame(
+  Model = c("Exponential", "Weibull"),
+  "Log-HR" = c(beta_hr_exp, beta_hr_weib),
+  "HR" = c(hr_exp, hr_weib),
+  "95% CI Lower" = c(hr_exp_ci[1], hr_weib_ci[1]),
+  "95% CI Upper" = c(hr_exp_ci[2], hr_weib_ci[2])
+)
+
+# extract HR and 95% CI 
+cox_hr <- exp(coef(cox_model)["age"])
+cox_ci <- exp(confint(cox_model)["age", ])
+
+# combine results for comparison
+results_age <- data.frame(
+  Covariate = "age",
+  Cox_HR = cox_hr,
+  Cox_CIL = cox_ci[1],
+  Cox_CIU = cox_ci[2], 
+  Exp_HR = results[1, 3],
+  Exp_CIL = results[1, 4],
+  Exp_CIU = results[1, 5],
+  Wei_HR = results[2, 3],
+  Wei_CIL = results[2, 4],
+  Wei_CIU = results[2, 5]
+) 
+
+# nonwhite race
+# extract AFT beta and SE for nonwhite race (exponential model)
+beta_aft_exp <- aft_exponential$res["nonwhite", "est"]
+se_aft_exp <- aft_exponential$res["nonwhite", "se"]
+
+# log-hazard ratio for exponential 
+beta_hr_exp <- beta_aft_exp
+
+# HR and 95% CI 
+hr_exp <- exp(beta_hr_exp)
+hr_exp_ci <- exp(c(beta_hr_exp - 1.96 * se_aft_exp, beta_hr_exp + 1.96 * se_aft_exp))
+
+# extract AFT beta and SE for nonwhite race (Weibull model)
+beta_aft_weib <- aft_weibull$res["nonwhite", "est"]
+se_aft_weib <- aft_weibull$res["nonwhite", "se"]
+
+# extract Weibull shape parameter
+alpha <- aft_weibull$res["shape", "est"]
+
+# log-hazard ratio for Weibull
+beta_hr_weib <- -beta_aft_weib / alpha
+se_hr_weib <- se_aft_weib / alpha
+
+# HR and 95% CI 
+hr_weib <- exp(beta_hr_weib)
+hr_weib_ci <- exp(c(beta_hr_weib - 1.96 * se_hr_weib, beta_hr_weib + 1.96 * se_hr_weib))
+
+results <- data.frame(
+  Model = c("Exponential", "Weibull"),
+  "Log-HR" = c(beta_hr_exp, beta_hr_weib),
+  "HR" = c(hr_exp, hr_weib),
+  "95% CI Lower" = c(hr_exp_ci[1], hr_weib_ci[1]),
+  "95% CI Upper" = c(hr_exp_ci[2], hr_weib_ci[2])
+)
+
+# extract HR and 95% CI 
+cox_hr <- exp(coef(cox_model)["nonwhite"])
+cox_ci <- exp(confint(cox_model)["nonwhite", ])
+
+# combine results for comparison
+results_nonwhite <- data.frame(
+  Covariate = "nonwhite",
+  Cox_HR = cox_hr,
+  Cox_CIL = cox_ci[1],
+  Cox_CIU = cox_ci[2], 
+  Exp_HR = results[1, 3],
+  Exp_CIL = results[1, 4],
+  Exp_CIU = results[1, 5],
+  Wei_HR = results[2, 3],
+  Wei_CIL = results[2, 4],
+  Wei_CIU = results[2, 5]
+) 
+
+# treatment
+# extract AFT beta and SE for treatment (exponential model)
+beta_aft_exp <- aft_exponential$res["treat", "est"]
+se_aft_exp <- aft_exponential$res["treat", "se"]
+
+# log-hazard ratio for exponential 
+beta_hr_exp <- beta_aft_exp
+
+# HR and 95% CI 
+hr_exp <- exp(beta_hr_exp)
+hr_exp_ci <- exp(c(beta_hr_exp - 1.96 * se_aft_exp, beta_hr_exp + 1.96 * se_aft_exp))
+
+# extract AFT beta and SE for treatment (Weibull model)
+beta_aft_weib <- aft_weibull$res["treat", "est"]
+se_aft_weib <- aft_weibull$res["treat", "se"]
+
+# extract Weibull shape parameter
+alpha <- aft_weibull$res["shape", "est"]
+
+# log-hazard ratio for Weibull
+beta_hr_weib <- -beta_aft_weib / alpha
+se_hr_weib <- se_aft_weib / alpha
+
+# HR and 95% CI 
+hr_weib <- exp(beta_hr_weib)
+hr_weib_ci <- exp(c(beta_hr_weib - 1.96 * se_hr_weib, beta_hr_weib + 1.96 * se_hr_weib))
+
+results <- data.frame(
+  Model = c("Exponential", "Weibull"),
+  "Log-HR" = c(beta_hr_exp, beta_hr_weib),
+  "HR" = c(hr_exp, hr_weib),
+  "95% CI Lower" = c(hr_exp_ci[1], hr_weib_ci[1]),
+  "95% CI Upper" = c(hr_exp_ci[2], hr_weib_ci[2])
+)
+
+# extract HR and 95% CI 
+cox_hr <- exp(coef(cox_model)["treat"])
+cox_ci <- exp(confint(cox_model)["treat", ])
+
+# combine results for comparison
+results_treat <- data.frame(
+  Covariate = "treat",
+  Cox_HR = cox_hr,
+  Cox_CIL = cox_ci[1],
+  Cox_CIU = cox_ci[2], 
+  Exp_HR = results[1, 3],
+  Exp_CIL = results[1, 4],
+  Exp_CIU = results[1, 5],
+  Wei_HR = results[2, 3],
+  Wei_CIL = results[2, 4],
+  Wei_CIU = results[2, 5]
+) 
+
+# site
+# extract AFT beta and SE for site (exponential model)
+beta_aft_exp <- aft_exponential$res["site", "est"]
+se_aft_exp <- aft_exponential$res["site", "se"]
+
+# log-hazard ratio for exponential 
+beta_hr_exp <- beta_aft_exp
+
+# HR and 95% CI 
+hr_exp <- exp(beta_hr_exp)
+hr_exp_ci <- exp(c(beta_hr_exp - 1.96 * se_aft_exp, beta_hr_exp + 1.96 * se_aft_exp))
+
+# extract AFT beta and SE for site (Weibull model)
+beta_aft_weib <- aft_weibull$res["site", "est"]
+se_aft_weib <- aft_weibull$res["site", "se"]
+
+# extract Weibull shape parameter
+alpha <- aft_weibull$res["shape", "est"]
+
+# log-hazard ratio for Weibull
+beta_hr_weib <- -beta_aft_weib / alpha
+se_hr_weib <- se_aft_weib / alpha
+
+# HR and 95% CI 
+hr_weib <- exp(beta_hr_weib)
+hr_weib_ci <- exp(c(beta_hr_weib - 1.96 * se_hr_weib, beta_hr_weib + 1.96 * se_hr_weib))
+
+results <- data.frame(
+  Model = c("Exponential", "Weibull"),
+  "Log-HR" = c(beta_hr_exp, beta_hr_weib),
+  "HR" = c(hr_exp, hr_weib),
+  "95% CI Lower" = c(hr_exp_ci[1], hr_weib_ci[1]),
+  "95% CI Upper" = c(hr_exp_ci[2], hr_weib_ci[2])
+)
+
+# extract HR and 95% CI 
+cox_hr <- exp(coef(cox_model)["site"])
+cox_ci <- exp(confint(cox_model)["site", ])
+
+# combine results for comparison
+results_site <- data.frame(
+  Covariate = "site",
+  Cox_HR = cox_hr,
+  Cox_CIL = cox_ci[1],
+  Cox_CIU = cox_ci[2], 
+  Exp_HR = results[1, 3],
+  Exp_CIL = results[1, 4],
+  Exp_CIU = results[1, 5],
+  Wei_HR = results[2, 3],
+  Wei_CIL = results[2, 4],
+  Wei_CIU = results[2, 5]
+) 
+
+# data summary
+combined <- rbind(
+  results_ivdrug,
+  results_age,
+  results_nonwhite,
+  results_treat,
+  results_site
+) |> 
+  mutate(
+    Cox_CI = paste0("(", round(Cox_CIL, 2), ", ", round(Cox_CIU, 2), ")"),
+    Exp_CI = paste0("(", round(Exp_CIL, 2), ", ", round(Exp_CIU, 2), ")"),
+    Wei_CI = paste0("(", round(Wei_CIL, 2), ", ", round(Wei_CIU, 2), ")")
+  ) |> 
+  select(Cox_HR, Cox_CI, Exp_HR, Exp_CI, Wei_HR, Wei_CI)
+
+combined |> 
+  kable(digits = 2)
+```
+
+Comparison of the HR for `ivdrug` in the three models:
+
+- Cox Model  
+The HR for `ivdrug` is 1.44 (95%CI: 1.17, 1.77). This indicates that individuals with IV drug use have a 44% higher hazard of relapse compared to those without IV drug use, adjusting for other covariates. This is statistically significant.  
+
+- Exponential Model  
+The HR for `ivdrug` is 1.52 (95%CI: 1.24, 1.87). This suggests that individuals with IV drug use have a 53% higher hazard of relapse than those without IV drug use, adjusting for other covariates. This is statistically significant and the direction of HR is similar to that of Cox PH model.
+
+- Weibull Model  
+The HR for `ivdrug` 1.55 (95%CI: 1.25, 1.94). This indicates a 55% higher hazard of relapse for individuals with IV drug use, adjusting for other covariates. This is statistically significant and the direction of HR is similar to that of Cox PH model.
+
+Overall, three models showed a consistent direction of the hazard ratio, with individuals with IV drug use having a higher hazard of relapse compared to those without IV drug use. 
 
 # 2. Hazard Rates and Survival from Parametric Models
 ## a. 
