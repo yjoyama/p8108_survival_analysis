@@ -91,8 +91,31 @@ results |>
   kable()
 ```
 
+The Log-logistic model has the lowest AIC (6141.191), making it the best-fitting model based on AIC.
 
 ### ii.
+Given the AIC, Weibull model does not provide an improved fit compared to the exponential model. I will confirm this using likelihood ratio test.
+```{r}
+# extract log-likelihoods
+logL_exp <- aft_exponential$loglik
+logL_weib <- aft_weibull$loglik
+
+# compute LRT statistic
+lrt_stat <- -2 * (logL_exp - logL_weib)
+
+# df 
+degf <- aft_weibull$npars - aft_exponential$npars
+
+# p-value
+p_value <- pchisq(lrt_stat, df = degf, lower.tail = FALSE)
+
+# output results
+cat("LRT Statistic:", lrt_stat)
+cat("Degrees of Freedom:", degf)
+cat("p-value:", p_value)
+```
+
+Given p-value > 0.05, we fail to reject the null hypothesis and conclude that Weibull model does not improve fit compared to the exponential model.
 
 ### iii.
 
