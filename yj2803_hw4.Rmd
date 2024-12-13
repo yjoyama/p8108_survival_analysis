@@ -1,0 +1,85 @@
+---
+title: "Homework4"
+author: "Yuki Joyama"
+output: 
+  pdf_document:
+    latex_engine: xelatex
+    extra_dependencies: ["fontspec", "amsmath", "amssymb", "unicode-math"]
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = T, message = F, warning = F, collapse = T)
+
+library(tidyverse)
+library(ggplot2)
+library(knitr)
+library(survival)
+library(survminer)
+library(ggsurvfit)
+library(flexsurv)
+```
+
+```{r}
+# import data
+df = haven::read_dta("./data/umaru.dta")
+```
+
+
+# 1. Parametric/Accelerated Failure Time Models
+## a. 
+Variables: `age`, `nonwhite`, `treat`, `site`, `ivdrug`   
+Models: Exponential, Weibull, Log-logistic, Log-normal, Generalized Gamma
+
+```{r}
+# define the survival object
+surv_object <- Surv(time = df$time, event = df$censor)
+
+# fit AFT models with different distributions
+aft_exponential <- survreg(surv_object ~ age + nonwhite + treat + site + ivdrug, data = df, dist = "exponential")
+aft_weibull <- survreg(surv_object ~ age + nonwhite + treat + site + ivdrug, data = df, dist = "weibull")
+aft_loglogistic <- survreg(surv_object ~ age + nonwhite + treat + site + ivdrug, data = df, dist = "loglogistic")
+aft_lognormal <- survreg(surv_object ~ age + nonwhite + treat + site + ivdrug, data = df, dist = "lognormal")
+aft_gen_gamma <- flexsurvreg(surv_object ~ age + nonwhite + treat + site + ivdrug, data = df, dist = "gengamma")
+
+# summarize the results
+summary(aft_exponential)
+summary(aft_weibull)
+summary(aft_loglogistic)
+summary(aft_lognormal)
+summary(aft_gen_gamma)
+```
+
+### i.
+
+### ii.
+
+### iii.
+
+## b.
+
+## c. 
+
+## d.
+
+# 2. Hazard Rates and Survival from Parametric Models
+## a. 
+
+## b.
+
+## c. 
+
+## d.
+
+
+
+
+
+
+
+
+
+
+
+
