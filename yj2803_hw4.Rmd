@@ -570,7 +570,7 @@ Therefore,
 $S_0(182)=e^{-(0.00267\times 182)^{0.9520}}\approx$ `r round(exp(-0.48594^0.9520), 2)`  
 $S_0(182)=e^{-(0.00391\times 182)^{0.9520}}\approx$ `r round(exp(-0.71162^0.9520), 2)`  
 
-At 6 months, individuals without IV drug use have a higher survival probability (68%) compared to those with IV drug use (57%). 
+At 6 months, individuals without IV drug use have a higher survival probability (60%) compared to those with IV drug use (49%). 
 
 ## d. Log-logistic Model  
 Under the log-logistic model, $S(t)=\frac{1}{1+(\frac{t}{\rho})^\gamma}$, where $\rho$ is scale parameter and $\gamma$ is shape parameter.  
