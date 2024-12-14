@@ -538,16 +538,51 @@ The HR for `ivdrug` 1.55 (95%CI: 1.25, 1.94). This indicates a 55% higher hazard
 Overall, three models showed a consistent direction of the hazard ratio, with individuals with IV drug use having a higher hazard of relapse compared to those without IV drug use. 
 
 # 2. Hazard Rates and Survival from Parametric Models
-## a. 
+## a. Exponential Model
+Under the exponential model, $\hat{\lambda}=\frac{\text{Number of events}}{\text{Total follow-up time}}$.  
+Therefore,  
+$\hat{\lambda}_0=\frac{165}{277.031\times 223}\approx$ `r round(165/(277.031*223), 5)`  
+$\hat{\lambda}_1=\frac{299}{219.097\times 352}\approx$ `r round(299/(219.097*352), 5)`  
+
+Based on the AFT model, $ln(\hat{\lambda}_1)=ln(\hat{\lambda}_0)-\beta_{AFT}\Rightarrow\hat{\lambda}_1=\hat{\lambda}_0\times e^{-\beta_{AFT}}$  
+Given the SAS output, we obtain:   
+$\hat{\lambda}_0=e^{-5.9254}\approx$ `r round(exp(-5.9254), 5)`  
+$\hat{\lambda}_1=0.00267\times e^{0.3727}\approx$ `r round(0.00267*exp(0.3727), 5)`    
+Both methods yield the same result.  
 
 ## b.
+In the exponential model, $S(t)=e^{-\lambda t}$.  
+Therefore, the predicted probability of no relapse by 6 months (182 days) for each IV drug use group are:   
+$S_0(182)=e^{-0.00267\times 182}\approx$ `r round(exp(-0.00267*182), 3)`  
+$S_1(182)=e^{-0.00388\times 182}\approx$ `r round(exp(-0.00388*182), 3)`
 
-## c. 
+Now, let $t^*$ be the time where $S_1(t^*)=S_0(182)$.  
+$e^{-\lambda_1\times t^*}=e^{-\lambda_0\times 182} \Rightarrow t^*=\frac{\lambda_0\times 182}{\lambda_1}\approx$ `r round((0.00267*182)/0.00388)`  
+Individuals with prior IV drug use reach the same survival probability as the 6-month survival of those without IV drug use after approximately 125 days.
 
-## d.
+## c. Weibull Model
+Under the Weibull model, $S(t)=e^{-(\lambda t)^\kappa}$, where $\kappa$ is shape parameter.  
+Given the SAS output,  
+$\lambda_0=e^{-\beta_0}=e^{-5.9255}\approx$ `r round(exp(-5.9255), 5)`  
+$\lambda_1=e^{-(\beta_0+\beta_{\text{ivdrug}})}= e^{-(5.9255-0.3813)}=e^{-5.5442}\approx$ `r round(exp(-5.5442), 5)`  
+$\kappa = 0.9520$  
+Therefore,  
+$S_0(182)=e^{-(0.00267\times 182)^{0.9520}}\approx$ `r round(exp(-0.00267*182^0.9520), 2)`  
+$S_0(182)=e^{-(0.00391\times 182)^{0.9520}}\approx$ `r round(exp(-0.00391*182^0.9520), 2)`  
 
+At 6 months, individuals without IV drug use have a higher survival probability (68%) compared to those with IV drug use (57%). 
 
-
+## d. Log-logistic Model  
+Under the log-logistic model, $S(t)=\frac{1}{1+(\frac{t}{\rho})^\gamma}$, where $\rho$ is scale parameter and $\gamma$ is shape parameter.  
+Given the SAS output,   
+$\rho_0=e^{\beta_0}=e^{5.3830}\approx$ `r round(exp(5.3830), 3)`    
+$\rho_1=e^{\beta_0+\beta_{\text{ivdrug}}}=e^{5.3830-0.3389}\approx$ `r round(exp(5.3830-0.3389), 3)`  
+$\gamma=0.7288$  
+Therefore,   
+$S_0(182)=\frac{1}{1+(\frac{182}{217.674})^{0.7288}}\approx$ `r round(1/(1+(182/217.674)^0.7288), 2)`  
+$S_1(182)=\frac{1}{1+(\frac{182}{155.105})^{0.7288}}\approx$ `r round(1/(1+(182/155.105)^0.7288), 2)`  
+At 6 months, individuals without IV drug use have a higher survival probability (53%) compared to those with IV drug use (47%).  
+All three models are consistent with the increased relapse risk associated with prior IV drug use.
 
 
 
